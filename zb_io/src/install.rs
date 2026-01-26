@@ -5,7 +5,9 @@ use std::sync::Arc;
 use crate::api::ApiClient;
 use crate::blob::BlobCache;
 use crate::db::Database;
-use crate::download::{DownloadProgressCallback, DownloadRequest, DownloadResult, ParallelDownloader};
+use crate::download::{
+    DownloadProgressCallback, DownloadRequest, DownloadResult, ParallelDownloader,
+};
 use crate::link::{LinkedFile, Linker};
 use crate::materialize::Cellar;
 use crate::progress::{InstallProgress, ProgressCallback};
@@ -124,7 +126,11 @@ impl Installer {
                             name: formula.name.clone(),
                         };
 
-                        match self.downloader.download_single(request, progress.clone()).await {
+                        match self
+                            .downloader
+                            .download_single(request, progress.clone())
+                            .await
+                        {
                             Ok(new_path) => {
                                 blob_path = new_path;
                                 // Continue to next iteration to retry extraction
@@ -273,12 +279,10 @@ impl Installer {
                     });
 
                     // Try extraction with retry logic for corrupted downloads
-                    let store_entry = match self.extract_with_retry(
-                        &download,
-                        formula,
-                        bottle,
-                        download_progress.clone(),
-                    ).await {
+                    let store_entry = match self
+                        .extract_with_retry(&download, formula, bottle, download_progress.clone())
+                        .await
+                    {
                         Ok(entry) => entry,
                         Err(e) => {
                             error = Some(e);
@@ -583,8 +587,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install
         installer.install("testpkg", true).await.unwrap();
@@ -658,8 +661,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install
         installer.install("uninstallme", true).await.unwrap();
@@ -733,8 +735,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install and uninstall
         installer.install("gctest", true).await.unwrap();
@@ -811,8 +812,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install but don't uninstall
         installer.install("keepme", true).await.unwrap();
@@ -918,8 +918,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install main package (should also install dependency)
         installer.install("mainpkg", true).await.unwrap();
@@ -1016,8 +1015,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install root (should install all 5 packages)
         installer.install("root", true).await.unwrap();
@@ -1101,8 +1099,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install slow package (which depends on fast)
         // With streaming, fast should be extracted while slow is still downloading
@@ -1200,8 +1197,7 @@ mod tests {
         let linker = Linker::new(&prefix).unwrap();
         let db = Database::open(&root.join("db/zb.sqlite3")).unwrap();
 
-        let mut installer =
-            Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
+        let mut installer = Installer::new(api_client, blob_cache, store, cellar, linker, db, 4);
 
         // Install - should succeed (first download is valid in this test)
         installer.install("retrypkg", true).await.unwrap();

@@ -107,10 +107,7 @@ fn is_writable(path: &PathBuf) -> bool {
 
 /// Run initialization - create directories and set permissions
 fn run_init(root: &PathBuf, prefix: &PathBuf) -> Result<(), String> {
-    println!(
-        "{} Initializing zerobrew...",
-        style("==>").cyan().bold()
-    );
+    println!("{} Initializing zerobrew...", style("==>").cyan().bold());
 
     let dirs_to_create = vec![
         root.clone(),
@@ -129,7 +126,9 @@ fn run_init(root: &PathBuf, prefix: &PathBuf) -> Result<(), String> {
             !is_writable(d)
         } else {
             // Check parent
-            d.parent().map(|p| p.exists() && !is_writable(&p.to_path_buf())).unwrap_or(true)
+            d.parent()
+                .map(|p| p.exists() && !is_writable(&p.to_path_buf()))
+                .unwrap_or(true)
         }
     });
 
@@ -187,10 +186,7 @@ fn run_init(root: &PathBuf, prefix: &PathBuf) -> Result<(), String> {
     // Add to shell config if not already there
     add_to_path(prefix)?;
 
-    println!(
-        "{} Initialization complete!",
-        style("==>").cyan().bold()
-    );
+    println!("{} Initialization complete!", style("==>").cyan().bold());
 
     Ok(())
 }
@@ -285,9 +281,7 @@ fn ensure_init(root: &PathBuf, prefix: &PathBuf) -> Result<(), zb_core::Error> {
         });
     }
 
-    run_init(root, prefix).map_err(|e| zb_core::Error::StoreCorruption {
-        message: e,
-    })
+    run_init(root, prefix).map_err(|e| zb_core::Error::StoreCorruption { message: e })
 }
 
 fn suggest_homebrew(formula: &str, error: &zb_core::Error) {
@@ -309,9 +303,8 @@ fn suggest_homebrew(formula: &str, error: &zb_core::Error) {
 async fn run(cli: Cli) -> Result<(), zb_core::Error> {
     // Handle init separately - it doesn't need the installer
     if matches!(cli.command, Commands::Init) {
-        return run_init(&cli.root, &cli.prefix).map_err(|e| zb_core::Error::StoreCorruption {
-            message: e,
-        });
+        return run_init(&cli.root, &cli.prefix)
+            .map_err(|e| zb_core::Error::StoreCorruption { message: e });
     }
 
     // For reset, handle specially since directories may not be writable
@@ -622,9 +615,8 @@ async fn run(cli: Cli) -> Result<(), zb_core::Error> {
             }
 
             // Re-initialize with correct permissions
-            run_init(&cli.root, &cli.prefix).map_err(|e| zb_core::Error::StoreCorruption {
-                message: e,
-            })?;
+            run_init(&cli.root, &cli.prefix)
+                .map_err(|e| zb_core::Error::StoreCorruption { message: e })?;
 
             println!(
                 "{} Reset complete. Ready for cold install.",
